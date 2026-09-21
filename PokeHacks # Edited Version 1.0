@@ -1,11 +1,11 @@
 // ==UserScript==
-// @name         PokeClicker Hacks (Instant Catch, Turbo Auto Clicker, Collapsible Sections & Resets)
+// @name         PokeClicker Hacks (Modal, Turbo Auto Clicker & Original Multipliers)
 // @author       fiammanda #edited by cKY
-// @version      4.4
+// @version      5.0
 // @grant        none
 // @match        https://www.pokeclicker.com/
 // @license      MIT
-// @description  Clean hack modal with multipliers, instant catch, high-speed auto clicker, collapsible sections, and resets (No LocalStorage persistence)
+// @description  Modal hack menu with turbo auto clicker and original increment/reset multiplier logic
 // @namespace    https://greasyfork.org/users/1055144
 // ==/UserScript==
 
@@ -14,16 +14,15 @@
 (function() {
     'use strict';
 
-    // --- MODUŁ TURBO AUTOCLICKERA ---
+    // --- MODUŁ TURBO AUTOCLICKERA (100 kliknięć na klatkę) ---
     let autoClickerRunning = false;
     let animFrameId = null;
 
     function doAutoClick() {
         if (typeof App === 'undefined' || !App.game) return;
-
         if (App.game.challenges?.list?.disableClickAttack?.active()) return;
 
-        const clicksPerFrame = 10;
+        const clicksPerFrame = 100;
 
         for (let i = 0; i < clicksPerFrame; i++) {
             if (App.game.gameState === GameConstants.GameState.fighting) {
@@ -59,11 +58,9 @@
 
     window.toggleAutoClicker = function(enable) {
         const btn = document.getElementById('autoclicker-toggle-btn');
-
         if (enable === undefined) {
             enable = !autoClickerRunning;
         }
-
         autoClickerRunning = enable;
 
         if (animFrameId !== null) {
@@ -73,7 +70,6 @@
 
         if (autoClickerRunning) {
             animFrameId = requestAnimationFrame(autoClickLoop);
-
             if (btn) {
                 btn.classList.remove('btn-outline-secondary');
                 btn.classList.add('btn-success');
@@ -94,24 +90,22 @@
         const defaultCatchTimes = [1250, 1000, 750, 500];
 
         const hacks = [
-            [0, "catch rate"],
-            ["shiny", "shiny chance"],
-            ["roaming", "roaming chance"],
-            ["exp", "experience"],
-            ["eggStep", "egg step"],
-            ["money", "money"],
-            ["dungeonToken", "dungeon token"],
-            ["clickAttack", "player attack"],
-            ["pokemonAttack", "pokemon attack"],
-            [4, "berry growth"],
-            [8, "berry mutation"],
-            [9, "berry replant"],
-            [7, "mine energy"],
-            [10, "mine damage"],
-            [11, "mine award"]
+            [0, "catch rate", 10],
+            ["shiny", "shiny chance", 100],
+            ["roaming", "roaming chance", 10],
+            ["exp", "experience", 10],
+            ["eggStep", "egg step", 10],
+            ["money", "money", 10],
+            ["dungeonToken", "dungeon token", 10],
+            ["clickAttack", "player attack", 10],
+            ["pokemonAttack", "pokemon attack", 10],
+            [4, "berry growth", 100],
+            [8, "berry mutation", 100],
+            [9, "berry replant", 100],
+            [7, "mine energy", 100000],
+            [10, "mine damage", 100000],
+            [11, "mine award", 100000]
         ];
-
-        const multiplierOptions = [2, 4, 8, 16, 32, 64, 128, 256, 512];
 
         const style = document.createElement("style");
         style.innerHTML = `
@@ -157,13 +151,6 @@
             #hack tr.section-row:hover {
                 background-color: #dee2e6;
             }
-            #hack td.disabled {
-                background: rgba(0,0,0,.03);
-                pointer-events: none;
-            }
-            #hack td.disabled img, #hack td.disabled svg {
-                opacity: .25;
-            }
             #hack td:first-child:not(.section-header) {
                 padding-left: .5rem;
                 text-align: left;
@@ -178,27 +165,25 @@
             #hack td[onclick]:not(.section-header):hover {
                 background: rgba(0,0,0,.12);
             }
-            .hack-select {
-                font-size: 0.75rem;
-                font-weight: 600;
+            .hack-rate-display {
+                font-size: 0.8rem;
+                font-weight: 700;
                 padding: 3px 2px;
                 border-radius: 4px;
-                border: 1px solid rgba(0,0,0,.15);
                 background-color: rgba(0,0,0,.04);
                 color: #333;
-                cursor: pointer;
-                outline: none;
-                transition: all .2s ease-in-out;
                 width: 100%;
                 text-align: center;
-                text-align-last: center;
+                white-space: nowrap;
             }
-            .hack-select:hover {
-                background-color: rgba(0,0,0,.08);
+            .hack-rate-display::before {
+                content: attr(data-rate) attr(data-multiplier);
             }
-            .hack-select.active-rate {
+            .hack-rate-display[data-rate="0"]::before {
+                content: "-";
+            }
+            .hack-rate-display.active-rate {
                 background-color: rgba(40, 167, 69, 0.25) !important;
-                border-color: #28a745 !important;
                 color: #155724 !important;
             }
             .active-catch {
@@ -209,13 +194,25 @@
                 padding: 1px 6px;
                 line-height: 1.2;
             }
-            .autoclick-input {
-                width: 55px;
-                font-size: 0.75rem;
+            .pokeball-flex-container {
+                display: flex;
+                width: 100%;
+                justify-content: space-around;
+            }
+            .pokeball-flex-item {
+                flex: 1;
                 text-align: center;
-                padding: 2px;
-                border: 1px solid #ccc;
-                border-radius: 4px;
+                padding: .35rem .2rem;
+                cursor: pointer;
+                background: rgba(0,0,0,.05);
+                transition: background .2s ease-in-out;
+                border-right: 1px solid rgba(0,0,0,.1);
+            }
+            .pokeball-flex-item:last-child {
+                border-right: none;
+            }
+            .pokeball-flex-item:hover {
+                background: rgba(0,0,0,.12);
             }
         `;
         document.body.append(style);
@@ -250,85 +247,73 @@
                 <div id="hack" class="modal-body p-0">
                     <table class="table table-bordered m-0">
                         <colgroup>
-                            <col style="width: 50%;">
-                            <col style="width: 10%;">
-                            <col style="width: 10%;">
-                            <col style="width: 15%;">
+                            <col style="width: 45%;">
+                            <col style="width: 12%;">
+                            <col style="width: 28%;">
                             <col style="width: 15%;">
                         </colgroup>
 
                         <!-- SEKCJA 1: MNOŻNIKI -->
                         <tr class="section-row">
-                            <td colspan="3" class="section-header" onclick="window.toggleSection('sec-multipliers')">
+                            <td class="section-header" onclick="window.toggleSection('sec-multipliers')">
                                 <span id="icon-sec-multipliers">▼</span> Multipliers
                             </td>
-                            <td colspan="2" class="text-center align-middle">
+                            <td colspan="3" class="text-center align-middle">
                                 <button class="btn btn-outline-secondary btn-reset-sec w-100" onclick="window.resetSection('multipliers');">Reset Section</button>
                             </td>
                         </tr>
                         <tbody id="sec-multipliers">`;
 
         hacks.forEach((h, i) => {
+            const multSymbol = h[2].toString().substring(1);
             html += `<tr><td>${h[1]}</td>`;
-
-            html += `<td id="hack-btn-add-${i}" onclick="`;
-            html += `let selectElem = document.getElementById('hack-select-${i}');`;
-            html += `let currentRate = Number(selectElem.value);`;
-            html += `let newRate = currentRate === 0 ? 2 : currentRate * 2;`;
-            html += `if (newRate > 512) newRate = 512;`;
-            html += `window.applyHackRate(${i}, newRate);`;
-            html += `"><svg fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 5.75V18.25"/><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M18.25 12L5.75 12"/></svg></td>`;
-
-            html += `<td id="hack-btn-sub-${i}" class="disabled" onclick="window.applyHackRate(${i}, 0);">`;
-            html += `<svg fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11.25 4.75L8.75 7L11.25 9.25"/><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12.75 19.25L15.25 17L12.75 14.75"/><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.75 7H13.25C16.5637 7 19.25 9.68629 19.25 13V13.25"/><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14.25 17H10.75C7.43629 17 4.75 14.3137 4.75 11V10.75"/></svg></td>`;
-
-            html += `<td colspan="2"><select id="hack-select-${i}" class="hack-select" onchange="window.applyHackRate(${i}, Number(this.value));">`;
-            html += `<option value="0">DEFAULT</option>`;
-            multiplierOptions.forEach(opt => {
-                html += `<option value="${opt}">x${opt}</option>`;
-            });
-            html += `</select></td></tr>`;
+            // Przycisk zwiększania (+)
+            html += `<td onclick="window.changeHackRate(${i});" title="Zwiększ mnożnik">`;
+            html += `<svg fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 5.75V18.25"/><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M18.25 12L5.75 12"/></svg></td>`;
+            // Wyświetlacz wartości
+            html += `<td><div id="hack-rate-${i}" class="hack-rate-display" data-rate="0" data-multiplier="${multSymbol}"></div></td>`;
+            // Przycisk resetu pojedynczego wiersza (-)
+            html += `<td onclick="window.resetSingleHack(${i});" title="Resetuj">`;
+            html += `<svg fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11.25 4.75L8.75 7L11.25 9.25"/><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12.75 19.25L15.25 17L12.75 14.75"/><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.75 7H13.25C16.5637 7 19.25 9.68629 19.25 13V13.25"/><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14.25 17H10.75C7.43629 17 4.75 14.3137 4.75 11V10.75"/></svg></td></tr>`;
         });
 
         html += `</tbody>
                         <!-- SEKCJA 2: AUTOMATYZACJA I PRZEŁĄCZNIKI -->
                         <tr class="section-row">
-                            <td colspan="3" class="section-header" onclick="window.toggleSection('sec-automation')">
+                            <td class="section-header" onclick="window.toggleSection('sec-automation')">
                                 <span id="icon-sec-automation">▼</span> Automation & Toggles
                             </td>
-                            <td colspan="2" class="text-center align-middle">
+                            <td colspan="3" class="text-center align-middle">
                                 <button class="btn btn-outline-secondary btn-reset-sec w-100" onclick="window.resetSection('automation');">Reset Section</button>
                             </td>
                         </tr>
                         <tbody id="sec-automation">
                         <tr>
-                            <td>instant catch (0ms)</td>`;
+                            <td>instant catch (0ms)</td>
+                            <td colspan="3" class="p-0">
+                                <div class="pokeball-flex-container">`;
 
         balls.forEach((b, idx) => {
             html += `
-                <td id="pokeball-btn-${idx}" onclick="
-                    if (this.classList.contains('active-catch')) {
-                        this.classList.remove('active-catch');
-                        App.game.pokeballs.pokeballs[${idx}].catchTime = ${defaultCatchTimes[idx]};
-                    } else {
-                        this.classList.add('active-catch');
-                        App.game.pokeballs.pokeballs[${idx}].catchTime = 0;
-                    }
-                "><img src="${b.img}" title="${b.name}"></td>`;
+                                    <div id="pokeball-btn-${idx}" class="pokeball-flex-item" onclick="
+                                        if (this.classList.contains('active-catch')) {
+                                            this.classList.remove('active-catch');
+                                            App.game.pokeballs.pokeballs[${idx}].catchTime = ${defaultCatchTimes[idx]};
+                                        } else {
+                                            this.classList.add('active-catch');
+                                            App.game.pokeballs.pokeballs[${idx}].catchTime = 0;
+                                        }
+                                    "><img src="${b.img}" title="${b.name}"></div>`;
         });
 
         html += `
-                        </tr>
-                        <!-- WIERSZ AUTOCLICKERA TURBO -->
-                        <tr>
-                            <td>Turbo Auto Clicker</td>
-                            <td colspan="2">
-                                <button id="autoclicker-toggle-btn" class="btn btn-sm btn-outline-secondary w-100 font-weight-bold" onclick="window.toggleAutoClicker()">OFF</button>
-                            </td>
-                            <td colspan="2">
-                                <div class="d-flex align-items-center justify-content-center" title="Liczba kliknięć wykonywanych w każdej klatce gry">
-                                    <span style="font-size: 0.7rem;">10 clicks/tick</span>
                                 </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Turbo Auto Clicker (100x)</td>
+                            <td colspan="3">
+                                <button id="autoclicker-toggle-btn" class="btn btn-sm btn-outline-secondary w-100 font-weight-bold" onclick="window.toggleAutoClicker()">OFF</button>
                             </td>
                         </tr>
                         </tbody>
@@ -339,10 +324,13 @@
                     <span>edited by cKY</span>
                 </div>
             </div>
+        </div>
         `;
 
         modalContainer.innerHTML = html;
         document.body.appendChild(modalContainer);
+
+        const currentRates = {};
 
         window.toggleSection = function(sectionId) {
             const tbody = document.getElementById(sectionId);
@@ -358,50 +346,61 @@
             }
         };
 
-        window.applyHackRate = function(i, rate) {
+        window.changeHackRate = function(i) {
             const h = hacks[i];
-            const subBtn = document.getElementById(`hack-btn-sub-${i}`);
-            const selectElem = document.getElementById(`hack-select-${i}`);
+            const rateDisplay = document.getElementById(`hack-rate-${i}`);
+            let r = (currentRates[i] || 0) + 1;
+            currentRates[i] = r;
 
-            if (selectElem) {
-                selectElem.value = multiplierOptions.includes(rate) ? rate : "0";
-                if (rate > 0) {
-                    selectElem.classList.add('active-rate');
-                } else {
-                    selectElem.classList.remove('active-rate');
+            if (rateDisplay) {
+                rateDisplay.setAttribute('data-rate', r);
+                if (r > 0) {
+                    rateDisplay.classList.add('active-rate');
                 }
             }
 
-            if (rate > 0) {
-                if (subBtn) subBtn.classList.remove('disabled');
-                if (i == 0 || i > 8) {
-                    if (App.game.oakItems && App.game.oakItems.itemList[h[0]]) {
-                        App.game.oakItems.itemList[h[0]].bonusList = [rate, rate, rate, rate, rate, rate];
-                        App.game.oakItems.itemList[h[0]].inactiveBonus = rate;
-                    }
-                } else {
-                    if (App.game.multiplier) {
-                        App.game.multiplier.addBonus(h[0], () => rate);
-                    }
+            if (i == 0 || i > 8) {
+                let computedR = r * h[2];
+                if (App.game.oakItems && App.game.oakItems.itemList[h[0]]) {
+                    App.game.oakItems.itemList[h[0]].bonusList = [computedR, computedR, computedR, computedR, computedR, computedR];
+                    App.game.oakItems.itemList[h[0]].inactiveBonus = computedR;
                 }
             } else {
-                if (subBtn) subBtn.classList.add('disabled');
-                if (i == 0 || i > 8) {
-                    if (App.game.oakItems && App.game.oakItems.itemList[h[0]]) {
-                        App.game.oakItems.itemList[h[0]].bonusList = [1, 1, 1, 1, 1, 1];
-                        App.game.oakItems.itemList[h[0]].inactiveBonus = 1;
-                    }
-                } else {
-                    if (App.game.multiplier) {
-                        App.game.multiplier.addBonus(h[0], () => 1);
-                    }
+                let computedR = (r * h[2]) / Math.max((r - 1) * h[2], 1);
+                if (App.game.multiplier) {
+                    App.game.multiplier.addBonus(h[0], () => computedR);
+                }
+            }
+        };
+
+        window.resetSingleHack = function(i) {
+            const h = hacks[i];
+            const rateDisplay = document.getElementById(`hack-rate-${i}`);
+            const oldR = currentRates[i] || 0;
+            currentRates[i] = 0;
+
+            if (rateDisplay) {
+                rateDisplay.setAttribute('data-rate', 0);
+                rateDisplay.classList.remove('active-rate');
+            }
+
+            if (i == 0 || i > 8) {
+                if (App.game.oakItems && App.game.oakItems.itemList[h[0]]) {
+                    App.game.oakItems.itemList[h[0]].bonusList = [10, 10, 10, 10, 10, 10];
+                    App.game.oakItems.itemList[h[0]].inactiveBonus = 10;
+                }
+            } else {
+                if (App.game.multiplier && oldR > 0) {
+                    App.game.multiplier.addBonus(h[0], () => 1 / Math.max(oldR * h[2], 1));
                 }
             }
         };
 
         window.resetSection = function(section) {
             if (section === 'multipliers') {
-                hacks.forEach((_, i) => window.applyHackRate(i, 0));
+                hacks.forEach((h, i) => {
+                    window.resetSingleHack(i);
+                });
             } else if (section === 'automation') {
                 for (let idx = 0; idx < 4; idx++) {
                     const btn = document.getElementById(`pokeball-btn-${idx}`);
