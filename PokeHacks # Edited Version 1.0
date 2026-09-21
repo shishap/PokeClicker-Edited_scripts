@@ -98,7 +98,7 @@
     window.updateAutoClickCPF = function(value) {
         let cpf = parseInt(value) || 10;
         if (cpf < 1) cpf = 1;
-        if (cpf > 100) cpf = 100; // Bezpiecznik wydajnościowy
+        if (cpf > 100) cpf = 100;
         localStorage.setItem('poke_autoclick_cpf', cpf);
     };
 
@@ -152,13 +152,15 @@
                 padding: .35rem .2rem;
                 vertical-align: middle !important;
             }
-            #hack td.section-header {
+            #hack tr.section-row {
                 background-color: #e9ecef;
                 font-weight: bold;
                 text-transform: uppercase;
                 letter-spacing: 0.5px;
                 font-size: 0.75rem;
                 color: #495057;
+            }
+            #hack td.section-header {
                 text-align: left !important;
                 padding-left: .75rem !important;
                 padding-right: .5rem !important;
@@ -166,7 +168,7 @@
                 user-select: none;
                 transition: background-color 0.2s ease;
             }
-            #hack td.section-header:hover {
+            #hack tr.section-row:hover {
                 background-color: #dee2e6;
             }
             #hack td.disabled {
@@ -176,7 +178,7 @@
             #hack td.disabled img, #hack td.disabled svg {
                 opacity: .25;
             }
-            #hack td:first-child {
+            #hack td:first-child:not(.section-header) {
                 padding-left: .5rem;
                 text-align: left;
                 font-weight: 500;
@@ -220,7 +222,6 @@
                 font-size: 0.65rem;
                 padding: 1px 6px;
                 line-height: 1.2;
-                float: right;
             }
             .autoclick-input {
                 width: 55px;
@@ -271,10 +272,12 @@
                         </colgroup>
 
                         <!-- SEKCJA 1: MNOŻNIKI -->
-                        <tr>
-                            <td colspan="5" class="section-header" onclick="window.toggleSection('sec-multipliers')">
+                        <tr class="section-row">
+                            <td colspan="3" class="section-header" onclick="window.toggleSection('sec-multipliers')">
                                 <span id="icon-sec-multipliers">▼</span> Multipliers
-                                <button class="btn btn-outline-secondary btn-reset-sec" onclick="event.stopPropagation(); window.resetSection('multipliers');">Reset Section</button>
+                            </td>
+                            <td colspan="2" class="text-center align-middle">
+                                <button class="btn btn-outline-secondary btn-reset-sec w-100" onclick="window.resetSection('multipliers');">Reset Section</button>
                             </td>
                         </tr>
                         <tbody id="sec-multipliers">`;
@@ -306,10 +309,12 @@
 
         html += `</tbody>
                         <!-- SEKCJA 2: AUTOMATYZACJA I PRZEŁĄCZNIKI -->
-                        <tr>
-                            <td colspan="5" class="section-header" onclick="window.toggleSection('sec-automation')">
+                        <tr class="section-row">
+                            <td colspan="3" class="section-header" onclick="window.toggleSection('sec-automation')">
                                 <span id="icon-sec-automation">▼</span> Automation & Toggles
-                                <button class="btn btn-outline-secondary btn-reset-sec" onclick="event.stopPropagation(); window.resetSection('automation');">Reset Section</button>
+                            </td>
+                            <td colspan="2" class="text-center align-middle">
+                                <button class="btn btn-outline-secondary btn-reset-sec w-100" onclick="window.resetSection('automation');">Reset Section</button>
                             </td>
                         </tr>
                         <tbody id="sec-automation">
