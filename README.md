@@ -1,4 +1,4 @@
-# Hi there, I'm [cKy] 👋
+<img width="882" height="809" alt="image" src="https://github.com/user-attachments/assets/59c7390f-873e-4e96-a054-393f34cf94c8" /># Hi there, I'm [cKy] 👋
 
 Welcome to my GitHub profile! I specialize in **enhancing, optimizing, and customizing existing scripts** (primarily Userscripts, Tampermonkey extensions, browser tools, and web automations).
 
@@ -36,8 +36,7 @@ An upgraded and fixed Userscript for **PokeClicker** that moves hack toggles and
 
 #### 📸 Preview
 <p align="center">
-  <!-- Podmień poniższy link na ścieżkę do swojego zdjęcia lub adres URL -->
-  <img src="YOUR_IMAGE_URL_HERE.png" alt="PokeClicker Hacks Modal Preview" width="600px" />
+<img width="882" height="809" alt="image" src="https://github.com/user-attachments/assets/b9539c8d-150e-4d0c-95ed-05a577f618a9" />
 </p>
 
 #### 📜 Source Code
