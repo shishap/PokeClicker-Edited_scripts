@@ -23,4 +23,28 @@ My focus is on taking existing code and making it better—fixing bugs, refining
 
 ---
 
+### 🚀 Featured Project: PokeClicker Hacks (Modal + AutoSave)
+
+An upgraded and fixed Userscript for **PokeClicker** that moves hack toggles and multipliers into a clean, responsive Bootstrap modal window.
+
+#### ✨ Features & Improvements:
+- 🎛️ **Modal Interface:** Cleanly aligned table layout embedded directly into the game UI.
+- 💾 **AutoSave (localStorage):** Automatically remembers active toggles, custom multipliers, and automation loops after page refreshes.
+- ⚡ **Catch Time Toggle:** Quick-toggle catch speed reduction per Pokéball type with custom visual indicators.
+- 📈 **Custom Multipliers:** Incremental x2 steps for game rates, drops, and stats.
+- 🤖 **Automations:** Built-in auto-clicker and auto-hatcher logic.
+
+#### 📸 Preview
+<p align="center">
+  <!-- Podmień poniższy link na ścieżkę do swojego zdjęcia lub adres URL -->
+  <img src="YOUR_IMAGE_URL_HERE.png" alt="PokeClicker Hacks Modal Preview" width="600px" />
+</p>
+
+#### 📜 Source Code
+[![View Script on GitHub](https://img.shields.io/badge/View_Script-pokeclicker--hacks.user.js-blue?style=for-the-badge&logo=javascript)](./pokeclicker-hacks.user.js)
+
+*Click the badge above to view or install the full Userscript.*
+
+---
+
 📫 **Get in Touch:** Have a script that needs a fix, a UI overhaul, or a new feature? Feel free to reach out or check out my repositories!
