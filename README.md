@@ -41,7 +41,7 @@ An upgraded and fixed Userscript for **PokeClicker** that moves hack toggles and
 </p>
 
 #### 📜 Source Code
-[![View Script on GitHub](https://img.shields.io/badge/View_Script-pokeclicker--hacks.user.js-blue?style=for-the-badge&logo=javascript)](./pokeclicker-hacks.user.js)
+[![View Script on GitHub](https://img.shields.io/badge/View_Script-pokeclicker--hacks.user.js-blue?style=for-the-badge&logo=javascript)](./PokeHacks # Edited Version 1.0)
 
 *Click the badge above to view or install the full Userscript.*
 
