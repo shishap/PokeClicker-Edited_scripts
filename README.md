@@ -1,4 +1,4 @@
-<img width="882" height="809" alt="image" src="https://github.com/user-attachments/assets/59c7390f-873e-4e96-a054-393f34cf94c8" /># Hi there, I'm [cKy] 👋
+# Hi there, I'm [cKy] 👋
 
 Welcome to my GitHub profile! I specialize in **enhancing, optimizing, and customizing existing scripts** (primarily Userscripts, Tampermonkey extensions, browser tools, and web automations).
 
