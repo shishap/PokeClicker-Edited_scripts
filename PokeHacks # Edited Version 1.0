@@ -1,17 +1,109 @@
 // ==UserScript==
-// @name         PokeClicker Hacks (Instant Catch, Collapsible Sections & Resets)
+// @name         PokeClicker Hacks (Instant Catch, Turbo Auto Clicker, Collapsible Sections & Resets)
 // @author       fiammanda #edited by cKY
 // @version      1.0
 // @grant        none
 // @match        https://www.pokeclicker.com/
 // @license      MIT
-// @description  Clean hack modal with multipliers, instant catch, collapsible sections, and resets
+// @description  Clean hack modal with multipliers, instant catch, high-speed auto clicker, collapsible sections, and resets
 // @namespace    https://greasyfork.org/users/1055144
 // ==/UserScript==
+
+/* global App, GameConstants, Battle, GymBattle, DungeonRunner, DungeonBattle, TemporaryBattleBattle */
 
 (function() {
     'use strict';
 
+    // --- MODUŁ TURBO AUTOCLICKERA ---
+    let autoClickerRunning = false;
+    let animFrameId = null;
+
+    function doAutoClick() {
+        if (typeof App === 'undefined' || !App.game) return;
+
+        // Blokada jeśli aktywny jest challenge na brak klikania
+        if (App.game.challenges?.list?.disableClickAttack?.active()) return;
+
+        const clicksPerFrame = parseInt(localStorage.getItem('poke_autoclick_cpf')) || 10;
+
+        for (let i = 0; i < clicksPerFrame; i++) {
+            // Walka zwykła (na trasie)
+            if (App.game.gameState === GameConstants.GameState.fighting) {
+                if (typeof Battle !== 'undefined' && !Battle.catching()) {
+                    Battle.clickAttack();
+                }
+            }
+            // Walka w Sali (Gym)
+            else if (App.game.gameState === GameConstants.GameState.gym) {
+                if (typeof GymBattle !== 'undefined') {
+                    GymBattle.clickAttack();
+                }
+            }
+            // Walka w Lochach (Dungeon)
+            else if (App.game.gameState === GameConstants.GameState.dungeon) {
+                if (typeof DungeonRunner !== 'undefined' && typeof DungeonBattle !== 'undefined') {
+                    if (DungeonRunner.fighting() && !DungeonBattle.catching()) {
+                        DungeonBattle.clickAttack();
+                    }
+                }
+            }
+            // Walka specjalna / tymczasowa
+            else if (App.game.gameState === GameConstants.GameState.temporaryBattle) {
+                if (typeof TemporaryBattleBattle !== 'undefined') {
+                    TemporaryBattleBattle.clickAttack();
+                }
+            }
+        }
+    }
+
+    function autoClickLoop() {
+        if (!autoClickerRunning) return;
+        doAutoClick();
+        animFrameId = requestAnimationFrame(autoClickLoop);
+    }
+
+    window.toggleAutoClicker = function(enable) {
+        const btn = document.getElementById('autoclicker-toggle-btn');
+
+        if (enable === undefined) {
+            enable = !autoClickerRunning;
+        }
+
+        autoClickerRunning = enable;
+
+        if (animFrameId !== null) {
+            cancelAnimationFrame(animFrameId);
+            animFrameId = null;
+        }
+
+        if (autoClickerRunning) {
+            animFrameId = requestAnimationFrame(autoClickLoop);
+
+            if (btn) {
+                btn.classList.remove('btn-outline-secondary');
+                btn.classList.add('btn-success');
+                btn.innerText = 'ON';
+            }
+            localStorage.setItem('poke_autoclick_enabled', 'true');
+        } else {
+            if (btn) {
+                btn.classList.remove('btn-success');
+                btn.classList.add('btn-outline-secondary');
+                btn.innerText = 'OFF';
+            }
+            localStorage.setItem('poke_autoclick_enabled', 'false');
+        }
+    };
+
+    window.updateAutoClickCPF = function(value) {
+        let cpf = parseInt(value) || 10;
+        if (cpf < 1) cpf = 1;
+        if (cpf > 100) cpf = 100; // Bezpiecznik wydajnościowy
+        localStorage.setItem('poke_autoclick_cpf', cpf);
+    };
+
+
+    // --- GŁÓWNA INICJALIZACJA INTERFEJSU ---
     function initHackModal() {
         const defaultCatchTimes = [1250, 1000, 750, 500];
 
@@ -130,6 +222,14 @@
                 line-height: 1.2;
                 float: right;
             }
+            .autoclick-input {
+                width: 55px;
+                font-size: 0.75rem;
+                text-align: center;
+                padding: 2px;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+            }
         `;
         document.body.append(style);
 
@@ -169,7 +269,7 @@
                             <col style="width: 15%;">
                             <col style="width: 15%;">
                         </colgroup>
-                        
+
                         <!-- SEKCJA 1: MNOŻNIKI -->
                         <tr>
                             <td colspan="5" class="section-header" onclick="window.toggleSection('sec-multipliers')">
@@ -233,12 +333,25 @@
 
         html += `
                         </tr>
+                        <!-- WIERSZ AUTOCLICKERA TURBO -->
+                        <tr>
+                            <td>Turbo Auto Clicker</td>
+                            <td colspan="2">
+                                <button id="autoclicker-toggle-btn" class="btn btn-sm btn-outline-secondary w-100 font-weight-bold" onclick="window.toggleAutoClicker()">OFF</button>
+                            </td>
+                            <td colspan="2">
+                                <div class="d-flex align-items-center justify-content-center" title="Liczba kliknięć wykonywanych w każdej klatce gry">
+                                    <input type="number" id="autoclicker-cpf-input" class="autoclick-input" value="10" min="1" max="100" onchange="window.updateAutoClickCPF(this.value)">
+                                    <span class="ml-1" style="font-size: 0.7rem;">clicks/tick</span>
+                                </div>
+                            </td>
+                        </tr>
                         </tbody>
                     </table>
                 </div>
                 <div class="modal-footer p-2 d-flex justify-content-between align-items-center bg-light" style="font-size: 0.75rem; color: #6c757d;">
                     <button class="btn btn-sm btn-danger font-weight-bold" onclick="window.resetAllHacks();">Reset All</button>
-                    <span>edited by cKy</span>
+                    <span>edited by cKY</span>
                 </div>
             </div>
         </div>`;
@@ -299,14 +412,17 @@
             if (section === 'multipliers') {
                 hacks.forEach((_, i) => window.applyHackRate(i, 0));
             } else if (section === 'automation') {
+                // Wyłączenie Instant Catch
                 for (let idx = 0; idx < 4; idx++) {
                     const btn = document.getElementById(`pokeball-btn-${idx}`);
                     if (btn && btn.classList.contains('active-catch')) {
                         btn.click();
                     }
                 }
-                localStorage.removeItem('poke_autoclick');
-                localStorage.removeItem('poke_autohatch');
+                // Wyłączenie Auto Clickera
+                window.toggleAutoClicker(false);
+                document.getElementById('autoclicker-cpf-input').value = 10;
+                localStorage.setItem('poke_autoclick_cpf', '10');
             }
         };
 
@@ -325,6 +441,7 @@
         }, 500);
 
         function restoreSettings() {
+            // Przywracanie Instant Catch
             for (let idx = 0; idx < 4; idx++) {
                 if (localStorage.getItem(`poke_catch_time_${idx}`) === '1') {
                     const btn = document.getElementById(`pokeball-btn-${idx}`);
@@ -332,12 +449,24 @@
                 }
             }
 
+            // Przywracanie Mnożników
             hacks.forEach((h, i) => {
                 const savedRate = parseInt(localStorage.getItem(`poke_hack_rate_${i}`));
                 if (savedRate && savedRate > 0) {
                     window.applyHackRate(i, savedRate);
                 }
             });
+
+            // Przywracanie Ustawień Auto Clickera
+            const savedCPF = localStorage.getItem('poke_autoclick_cpf');
+            if (savedCPF) {
+                const input = document.getElementById('autoclicker-cpf-input');
+                if (input) input.value = savedCPF;
+            }
+
+            if (localStorage.getItem('poke_autoclick_enabled') === 'true') {
+                window.toggleAutoClicker(true);
+            }
         }
     }
 
