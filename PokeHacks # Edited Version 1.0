@@ -1,11 +1,11 @@
 // ==UserScript==
 // @name         PokeClicker Hacks (Instant Catch, Turbo Auto Clicker, Collapsible Sections & Resets)
 // @author       fiammanda #edited by cKY
-// @version      1.0
+// @version      4.4
 // @grant        none
 // @match        https://www.pokeclicker.com/
 // @license      MIT
-// @description  Clean hack modal with multipliers, instant catch, high-speed auto clicker, collapsible sections, and resets
+// @description  Clean hack modal with multipliers, instant catch, high-speed auto clicker, collapsible sections, and resets (No LocalStorage persistence)
 // @namespace    https://greasyfork.org/users/1055144
 // ==/UserScript==
 
@@ -21,25 +21,21 @@
     function doAutoClick() {
         if (typeof App === 'undefined' || !App.game) return;
 
-        // Blokada jeśli aktywny jest challenge na brak klikania
         if (App.game.challenges?.list?.disableClickAttack?.active()) return;
 
-        const clicksPerFrame = parseInt(localStorage.getItem('poke_autoclick_cpf')) || 10;
+        const clicksPerFrame = 10;
 
         for (let i = 0; i < clicksPerFrame; i++) {
-            // Walka zwykła (na trasie)
             if (App.game.gameState === GameConstants.GameState.fighting) {
                 if (typeof Battle !== 'undefined' && !Battle.catching()) {
                     Battle.clickAttack();
                 }
             }
-            // Walka w Sali (Gym)
             else if (App.game.gameState === GameConstants.GameState.gym) {
                 if (typeof GymBattle !== 'undefined') {
                     GymBattle.clickAttack();
                 }
             }
-            // Walka w Lochach (Dungeon)
             else if (App.game.gameState === GameConstants.GameState.dungeon) {
                 if (typeof DungeonRunner !== 'undefined' && typeof DungeonBattle !== 'undefined') {
                     if (DungeonRunner.fighting() && !DungeonBattle.catching()) {
@@ -47,7 +43,6 @@
                     }
                 }
             }
-            // Walka specjalna / tymczasowa
             else if (App.game.gameState === GameConstants.GameState.temporaryBattle) {
                 if (typeof TemporaryBattleBattle !== 'undefined') {
                     TemporaryBattleBattle.clickAttack();
@@ -84,22 +79,13 @@
                 btn.classList.add('btn-success');
                 btn.innerText = 'ON';
             }
-            localStorage.setItem('poke_autoclick_enabled', 'true');
         } else {
             if (btn) {
                 btn.classList.remove('btn-success');
                 btn.classList.add('btn-outline-secondary');
                 btn.innerText = 'OFF';
             }
-            localStorage.setItem('poke_autoclick_enabled', 'false');
         }
-    };
-
-    window.updateAutoClickCPF = function(value) {
-        let cpf = parseInt(value) || 10;
-        if (cpf < 1) cpf = 1;
-        if (cpf > 100) cpf = 100;
-        localStorage.setItem('poke_autoclick_cpf', cpf);
     };
 
 
@@ -285,7 +271,6 @@
         hacks.forEach((h, i) => {
             html += `<tr><td>${h[1]}</td>`;
 
-            // Kolumna 2: Dodaj (+)
             html += `<td id="hack-btn-add-${i}" onclick="`;
             html += `let selectElem = document.getElementById('hack-select-${i}');`;
             html += `let currentRate = Number(selectElem.value);`;
@@ -294,11 +279,9 @@
             html += `window.applyHackRate(${i}, newRate);`;
             html += `"><svg fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 5.75V18.25"/><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M18.25 12L5.75 12"/></svg></td>`;
 
-            // Kolumna 3: Reset
             html += `<td id="hack-btn-sub-${i}" class="disabled" onclick="window.applyHackRate(${i}, 0);">`;
             html += `<svg fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11.25 4.75L8.75 7L11.25 9.25"/><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12.75 19.25L15.25 17L12.75 14.75"/><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.75 7H13.25C16.5637 7 19.25 9.68629 19.25 13V13.25"/><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14.25 17H10.75C7.43629 17 4.75 14.3137 4.75 11V10.75"/></svg></td>`;
 
-            // Kolumna 4 i 5: Lista
             html += `<td colspan="2"><select id="hack-select-${i}" class="hack-select" onchange="window.applyHackRate(${i}, Number(this.value));">`;
             html += `<option value="0">DEFAULT</option>`;
             multiplierOptions.forEach(opt => {
@@ -327,11 +310,9 @@
                     if (this.classList.contains('active-catch')) {
                         this.classList.remove('active-catch');
                         App.game.pokeballs.pokeballs[${idx}].catchTime = ${defaultCatchTimes[idx]};
-                        localStorage.removeItem('poke_catch_time_${idx}');
                     } else {
                         this.classList.add('active-catch');
                         App.game.pokeballs.pokeballs[${idx}].catchTime = 0;
-                        localStorage.setItem('poke_catch_time_${idx}', '1');
                     }
                 "><img src="${b.img}" title="${b.name}"></td>`;
         });
@@ -346,8 +327,7 @@
                             </td>
                             <td colspan="2">
                                 <div class="d-flex align-items-center justify-content-center" title="Liczba kliknięć wykonywanych w każdej klatce gry">
-                                    <input type="number" id="autoclicker-cpf-input" class="autoclick-input" value="10" min="1" max="100" onchange="window.updateAutoClickCPF(this.value)">
-                                    <span class="ml-1" style="font-size: 0.7rem;">clicks/tick</span>
+                                    <span style="font-size: 0.7rem;">10 clicks/tick</span>
                                 </div>
                             </td>
                         </tr>
@@ -359,7 +339,7 @@
                     <span>edited by cKY</span>
                 </div>
             </div>
-        </div>`;
+        `;
 
         modalContainer.innerHTML = html;
         document.body.appendChild(modalContainer);
@@ -395,21 +375,27 @@
             if (rate > 0) {
                 if (subBtn) subBtn.classList.remove('disabled');
                 if (i == 0 || i > 8) {
-                    App.game.oakItems.itemList[h[0]].bonusList = [rate, rate, rate, rate, rate, rate];
-                    App.game.oakItems.itemList[h[0]].inactiveBonus = rate;
+                    if (App.game.oakItems && App.game.oakItems.itemList[h[0]]) {
+                        App.game.oakItems.itemList[h[0]].bonusList = [rate, rate, rate, rate, rate, rate];
+                        App.game.oakItems.itemList[h[0]].inactiveBonus = rate;
+                    }
                 } else {
-                    App.game.multiplier.addBonus(h[0], () => rate);
+                    if (App.game.multiplier) {
+                        App.game.multiplier.addBonus(h[0], () => rate);
+                    }
                 }
-                localStorage.setItem(`poke_hack_rate_${i}`, rate);
             } else {
                 if (subBtn) subBtn.classList.add('disabled');
                 if (i == 0 || i > 8) {
-                    App.game.oakItems.itemList[h[0]].bonusList = [1, 1, 1, 1, 1, 1];
-                    App.game.oakItems.itemList[h[0]].inactiveBonus = 1;
+                    if (App.game.oakItems && App.game.oakItems.itemList[h[0]]) {
+                        App.game.oakItems.itemList[h[0]].bonusList = [1, 1, 1, 1, 1, 1];
+                        App.game.oakItems.itemList[h[0]].inactiveBonus = 1;
+                    }
                 } else {
-                    App.game.multiplier.addBonus(h[0], () => 1);
+                    if (App.game.multiplier) {
+                        App.game.multiplier.addBonus(h[0], () => 1);
+                    }
                 }
-                localStorage.removeItem(`poke_hack_rate_${i}`);
             }
         };
 
@@ -417,17 +403,13 @@
             if (section === 'multipliers') {
                 hacks.forEach((_, i) => window.applyHackRate(i, 0));
             } else if (section === 'automation') {
-                // Wyłączenie Instant Catch
                 for (let idx = 0; idx < 4; idx++) {
                     const btn = document.getElementById(`pokeball-btn-${idx}`);
                     if (btn && btn.classList.contains('active-catch')) {
                         btn.click();
                     }
                 }
-                // Wyłączenie Auto Clickera
                 window.toggleAutoClicker(false);
-                document.getElementById('autoclicker-cpf-input').value = 10;
-                localStorage.setItem('poke_autoclick_cpf', '10');
             }
         };
 
@@ -441,38 +423,8 @@
             if (leftColumn && typeof App !== 'undefined' && App.game) {
                 clearInterval(checkInterval);
                 leftColumn.prepend(openBtnContainer);
-                restoreSettings();
             }
         }, 500);
-
-        function restoreSettings() {
-            // Przywracanie Instant Catch
-            for (let idx = 0; idx < 4; idx++) {
-                if (localStorage.getItem(`poke_catch_time_${idx}`) === '1') {
-                    const btn = document.getElementById(`pokeball-btn-${idx}`);
-                    if (btn && !btn.classList.contains('active-catch')) btn.click();
-                }
-            }
-
-            // Przywracanie Mnożników
-            hacks.forEach((h, i) => {
-                const savedRate = parseInt(localStorage.getItem(`poke_hack_rate_${i}`));
-                if (savedRate && savedRate > 0) {
-                    window.applyHackRate(i, savedRate);
-                }
-            });
-
-            // Przywracanie Ustawień Auto Clickera
-            const savedCPF = localStorage.getItem('poke_autoclick_cpf');
-            if (savedCPF) {
-                const input = document.getElementById('autoclicker-cpf-input');
-                if (input) input.value = savedCPF;
-            }
-
-            if (localStorage.getItem('poke_autoclick_enabled') === 'true') {
-                window.toggleAutoClicker(true);
-            }
-        }
     }
 
     if (document.readyState === "complete" || document.readyState === "interactive") {
