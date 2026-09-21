@@ -5,7 +5,7 @@
 // @grant        none
 // @match        https://www.pokeclicker.com/
 // @license      MIT
-// @description  Clean 2-section hack modal with collapsible sections, instant catch, and reset buttons
+// @description  Clean hack modal with multipliers, instant catch, collapsible sections, and resets
 // @namespace    https://greasyfork.org/users/1055144
 // ==/UserScript==
 
@@ -13,9 +13,6 @@
     'use strict';
 
     function initHackModal() {
-        window.clickHackInterval = window.clickHackInterval || null;
-        window.hatchHackInterval = window.hatchHackInterval || null;
-
         const defaultCatchTimes = [1250, 1000, 750, 500];
 
         const hacks = [
@@ -172,7 +169,7 @@
                             <col style="width: 15%;">
                             <col style="width: 15%;">
                         </colgroup>
-
+                        
                         <!-- SEKCJA 1: MNOŻNIKI -->
                         <tr>
                             <td colspan="5" class="section-header" onclick="window.toggleSection('sec-multipliers')">
@@ -235,16 +232,6 @@
         });
 
         html += `
-                        </tr>
-                        <tr>
-                            <td colspan="3">auto click</td>
-                            <td id="autoclick-start" onclick="this.classList.add('disabled');document.getElementById('autoclick-stop').classList.remove('disabled');window.clickHackInterval=setInterval(()=>{4==App.game.gameState&&DungeonRunner.handleClick()},100);localStorage.setItem('poke_autoclick', '1');"><svg fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M18.25 12L5.75 5.75V18.25L18.25 12Z"/></svg></td>
-                            <td id="autoclick-stop" class="disabled" onclick="this.classList.add('disabled');document.getElementById('autoclick-start').classList.remove('disabled');clearInterval(window.clickHackInterval);localStorage.removeItem('poke_autoclick');"><svg fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.25 6.75V17.25"/><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8.75 6.75V17.25"/></svg></td>
-                        </tr>
-                        <tr>
-                            <td colspan="3">auto hatch</td>
-                            <td id="autohatch-start" onclick="this.classList.add('disabled');document.getElementById('autohatch-stop').classList.remove('disabled');window.hatchHackInterval=setInterval(function(){for(let a=App.game.party.caughtPokemon.filter(a=>!(a.breeding||100>a.level)&&!(-1<BreedingController.filter.category()&&a.category!=BreedingController.filter.category())&&!(-1<BreedingController.filter.shinyStatus()&&+a.shiny!==BreedingController.filter.shinyStatus()));App.game.breeding.hasFreeQueueSlot()&&a.length;)App.game.breeding.addPokemonToHatchery(a[0]),a.shift()},6e4);localStorage.setItem('poke_autohatch', '1');"><svg fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M18.25 12L5.75 5.75V18.25L18.25 12Z"/></svg></td>
-                            <td id="autohatch-stop" class="disabled" onclick="this.classList.add('disabled');document.getElementById('autohatch-start').classList.remove('disabled');clearInterval(window.hatchHackInterval);localStorage.removeItem('poke_autohatch');"><svg fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.25 6.75V17.25"/><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8.75 6.75V17.25"/></svg></td>
                         </tr>
                         </tbody>
                     </table>
@@ -318,11 +305,8 @@
                         btn.click();
                     }
                 }
-                const stopClick = document.getElementById('autoclick-stop');
-                if (stopClick && !stopClick.classList.contains('disabled')) stopClick.click();
-
-                const stopHatch = document.getElementById('autohatch-stop');
-                if (stopHatch && !stopHatch.classList.contains('disabled')) stopHatch.click();
+                localStorage.removeItem('poke_autoclick');
+                localStorage.removeItem('poke_autohatch');
             }
         };
 
@@ -354,16 +338,6 @@
                     window.applyHackRate(i, savedRate);
                 }
             });
-
-            if (localStorage.getItem('poke_autoclick') === '1') {
-                const btn = document.getElementById('autoclick-start');
-                if (btn) btn.click();
-            }
-
-            if (localStorage.getItem('poke_autohatch') === '1') {
-                const btn = document.getElementById('autohatch-start');
-                if (btn) btn.click();
-            }
         }
     }
 
