@@ -36,7 +36,7 @@ An upgraded and fixed Userscript for **PokeClicker** that moves hack toggles and
 
 #### 📸 Preview
 <p align="center">
-<img width="882" height="809" alt="image" src="https://github.com/user-attachments/assets/b9539c8d-150e-4d0c-95ed-05a577f618a9" />
+<img width="479" height="657" alt="image" src="https://github.com/user-attachments/assets/eb544286-6953-41dd-82ed-b229741c5665" />
 </p>
 
 #### 📜 Source Code
