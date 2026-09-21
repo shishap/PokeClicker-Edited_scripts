@@ -23,12 +23,4 @@ My focus is on taking existing code and making it better—fixing bugs, refining
 
 ---
 
-### 📊 GitHub Stats
-<p align="center">
-  <img src="https://github-readme-stats.vercel.app/api?username=shishap&show_icons=true&theme=radial" alt="GitHub Stats" width="48%" />
-  <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=shishap&layout=compact&theme=radial" alt="Top Languages" width="48%" />
-</p>
-
----
-
 📫 **Get in Touch:** Have a script that needs a fix, a UI overhaul, or a new feature? Feel free to reach out or check out my repositories!
